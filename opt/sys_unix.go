@@ -82,8 +82,38 @@ func (e Error) Marshal() ([]byte, error) {
 }
 
 // Marshal implements the Marshal method of Option interface.
+func (l Linger) Marshal() ([]byte, error) {
+	v := struct {
+		OnOff  int32
+		Linger int32
+	}{
+		OnOff:  boolint32(l.OnOff),
+		Linger: int32(l.Linger / time.Second),
+	}
+	return (*[8]byte)(unsafe.Pointer(&v))[:], nil
+}
+
+// Marshal implements the Marshal method of Option interface.
 func (cn ECN) Marshal() ([]byte, error) {
 	v := boolint32(bool(cn))
+	return (*[4]byte)(unsafe.Pointer(&v))[:], nil
+}
+
+// Marshal implements the Marshal method of Option interface.
+func (qa QuickAck) Marshal() ([]byte, error) {
+	v := boolint32(bool(qa))
+	return (*[4]byte)(unsafe.Pointer(&v))[:], nil
+}
+
+// Marshal implements the Marshal method of Option interface.
+func (tda ThinDupAck) Marshal() ([]byte, error) {
+	v := boolint32(bool(tda))
+	return (*[4]byte)(unsafe.Pointer(&v))[:], nil
+}
+
+// Marshal implements the Marshal method of Option interface.
+func (tlt ThinLinearTimeouts) Marshal() ([]byte, error) {
+	v := boolint32(bool(tlt))
 	return (*[4]byte)(unsafe.Pointer(&v))[:], nil
 }
 
@@ -174,9 +204,44 @@ func parseError(b []byte) (Option, error) {
 	return Error(nativeEndian.Uint32(b)), nil
 }
 
+func parseLinger(b []byte) (Option, error) {
+	if len(b) < 8 {
+		return nil, errors.New("short buffer")
+	}
+	v := (*struct {
+		OnOff  int32
+		Linger int32
+	})(unsafe.Pointer(&b[0]))
+	return Linger{
+		OnOff:  uint32bool(uint32(v.OnOff)),
+		Linger: time.Duration(v.Linger) * time.Second,
+	}, nil
+}
+
 func parseECN(b []byte) (Option, error) {
 	if len(b) < 4 {
 		return nil, errors.New("short buffer")
 	}
 	return ECN(uint32bool(nativeEndian.Uint32(b))), nil
+}
+
+func parseQuickAck(b []byte) (Option, error) {
+	if len(b) < 4 {
+		return nil, errors.New("short buffer")
+	}
+	return QuickAck(uint32bool(nativeEndian.Uint32(b))), nil
+}
+
+func parseThinDupAck(b []byte) (Option, error) {
+	if len(b) < 4 {
+		return nil, errors.New("short buffer")
+	}
+	return ThinDupAck(uint32bool(nativeEndian.Uint32(b))), nil
+}
+
+func parseThinLinearTimeouts(b []byte) (Option, error) {
+	if len(b) < 4 {
+		return nil, errors.New("short buffer")
+	}
+	return ThinLinearTimeouts(uint32bool(nativeEndian.Uint32(b))), nil
 }

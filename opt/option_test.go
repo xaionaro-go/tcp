@@ -19,6 +19,7 @@ func TestMarshalAndParse(t *testing.T) {
 		opt.SendBuffer(1<<16 - 1),
 		opt.ReceiveBuffer(1<<16 - 1),
 		opt.KeepAlive(true),
+		opt.Linger{OnOff: true, Linger: 10 * time.Second},
 	}
 	switch runtime.GOOS {
 	case "openbsd":
@@ -38,6 +39,12 @@ func TestMarshalAndParse(t *testing.T) {
 	switch runtime.GOOS {
 	case "darwin", "linux":
 		opts = append(opts, opt.NotSentLowWMK(1))
+	}
+	switch runtime.GOOS {
+	case "linux":
+		opts = append(opts, opt.QuickAck(true))
+		opts = append(opts, opt.ThinDupAck(true))
+		opts = append(opts, opt.ThinLinearTimeouts(true))
 	}
 	switch runtime.GOOS {
 	case "windows":
@@ -81,9 +88,9 @@ const (
 
 type testOption struct{}
 
-func (*testOption) Level() int                        { return testOptLevel }
-func (*testOption) Name() int                         { return testOptName }
-func (*testOption) Marshal() ([]byte, error)          { return make([]byte, 16), nil }
+func (*testOption) Level() int                     { return testOptLevel }
+func (*testOption) Name() int                      { return testOptName }
+func (*testOption) Marshal() ([]byte, error)       { return make([]byte, 16), nil }
 func parseTestOption(_ []byte) (opt.Option, error) { return &testOption{}, nil }
 
 func TestUserDefinedOptionParser(t *testing.T) {

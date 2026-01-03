@@ -53,9 +53,13 @@ const (
 	soCork
 	soNotsentLOWAT
 	soError
+	soLinger
 	soECN
 	soMaxseg
 	soToa
+	soQuickack
+	soThinDupack
+	soThinLinearTimeouts
 	soMax
 )
 

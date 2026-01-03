@@ -13,13 +13,17 @@ const (
 	sysSO_SNDBUF    = 0x7
 	sysSO_RCVBUF    = 0x8
 	sysSO_ERROR     = 0x4
+	sysSO_LINGER    = 0xd
 
-	sysTCP_NODELAY       = 0x1
-	sysTCP_MAXSEG        = 0x2
-	sysTCP_KEEPIDLE      = 0x4
-	sysTCP_KEEPINTVL     = 0x5
-	sysTCP_KEEPCNT       = 0x6
-	sysTCP_CORK          = 0x3
-	sysTCP_NOTSENT_LOWAT = 0x19
-	sysTCP_TOA           = 0x80
+	sysTCP_NODELAY              = 0x1
+	sysTCP_MAXSEG               = 0x2
+	sysTCP_KEEPIDLE             = 0x4
+	sysTCP_KEEPINTVL            = 0x5
+	sysTCP_KEEPCNT              = 0x6
+	sysTCP_CORK                 = 0x3
+	sysTCP_NOTSENT_LOWAT        = 0x19
+	sysTCP_TOA                  = 0x80
+	sysTCP_QUICKACK             = 0xc
+	sysTCP_THIN_LINEAR_TIMEOUTS = 0x10
+	sysTCP_THIN_DUPACK          = 0x11
 )

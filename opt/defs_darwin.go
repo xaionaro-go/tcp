@@ -21,6 +21,7 @@ const (
 	sysSO_SNDBUF    = C.SO_SNDBUF
 	sysSO_RCVBUF    = C.SO_RCVBUF
 	sysSO_ERROR     = C.SO_ERROR
+	sysSO_LINGER    = C.SO_LINGER
 
 	sysTCP_NODELAY       = C.TCP_NODELAY
 	sysTCP_MAXSEG        = C.TCP_MAXSEG

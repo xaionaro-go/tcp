@@ -141,6 +141,18 @@ func (e Error) Level() int { return options[soError].level }
 // Name implements the Name method of Option interface.
 func (e Error) Name() int { return options[soError].name }
 
+// Linger specifies the linger time.
+type Linger struct {
+	OnOff  bool
+	Linger time.Duration
+}
+
+// Level implements the Level method of Option interface.
+func (l Linger) Level() int { return options[soLinger].level }
+
+// Name implements the Name method of Option interface.
+func (l Linger) Name() int { return options[soLinger].name }
+
 // ECN specifies the use of ECN.
 //
 // Only Darwin supports this option.
@@ -151,6 +163,33 @@ func (cn ECN) Level() int { return options[soECN].level }
 
 // Name implements the Name method of Option interface.
 func (cn ECN) Name() int { return options[soECN].name }
+
+// QuickAck specifies the use of TCP_QUICKACK.
+type QuickAck bool
+
+// Level implements the Level method of Option interface.
+func (qa QuickAck) Level() int { return options[soQuickack].level }
+
+// Name implements the Name method of Option interface.
+func (qa QuickAck) Name() int { return options[soQuickack].name }
+
+// ThinDupAck specifies the use of TCP_THIN_DUPACK.
+type ThinDupAck bool
+
+// Level implements the Level method of Option interface.
+func (tda ThinDupAck) Level() int { return options[soThinDupack].level }
+
+// Name implements the Name method of Option interface.
+func (tda ThinDupAck) Name() int { return options[soThinDupack].name }
+
+// ThinLinearTimeouts specifies the use of TCP_THIN_LINEAR_TIMEOUTS.
+type ThinLinearTimeouts bool
+
+// Level implements the Level method of Option interface.
+func (tlt ThinLinearTimeouts) Level() int { return options[soThinLinearTimeouts].level }
+
+// Name implements the Name method of Option interface.
+func (tlt ThinLinearTimeouts) Name() int { return options[soThinLinearTimeouts].name }
 
 type TOA struct {
 	Kind, Len byte

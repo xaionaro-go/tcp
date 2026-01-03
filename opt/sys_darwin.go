@@ -18,6 +18,7 @@ var options = [soMax]option{
 	soCork:         {ianaProtocolTCP, sysTCP_NOPUSH, 0},
 	soNotsentLOWAT: {ianaProtocolTCP, sysTCP_NOTSENT_LOWAT, 0},
 	soError:        {sysSOL_SOCKET, sysSO_ERROR, 0},
+	soLinger:       {sysSOL_SOCKET, sysSO_LINGER, 0},
 	soECN:          {ianaProtocolTCP, sysTCP_ENABLE_ECN, 0},
 }
 
@@ -33,5 +34,6 @@ var parsers = map[int64]func([]byte) (Option, error){
 	ianaProtocolTCP<<32 | sysTCP_NOPUSH:        parseCork,
 	ianaProtocolTCP<<32 | sysTCP_NOTSENT_LOWAT: parseNotSentLowWMK,
 	sysSOL_SOCKET<<32 | sysSO_ERROR:            parseError,
+	sysSOL_SOCKET<<32 | sysSO_LINGER:           parseLinger,
 	ianaProtocolTCP<<32 | sysTCP_ENABLE_ECN:    parseECN,
 }

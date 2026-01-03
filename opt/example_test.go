@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/xaionaro-go/tcp/opt"
 	"github.com/xaionaro-go/tcp"
+	"github.com/xaionaro-go/tcp/opt"
 )
 
 func TestOption(t *testing.T) {

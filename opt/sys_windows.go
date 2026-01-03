@@ -16,6 +16,7 @@ const (
 	sysSO_SNDBUF    = 0x1001
 	sysSO_RCVBUF    = 0x1002
 	sysSO_KEEPALIVE = 0x8
+	sysSO_LINGER    = 0x80
 
 	sysTCP_NODELAY = 0x1
 
@@ -33,6 +34,7 @@ var options = [soMax]option{
 	soKeepalive: {sysSOL_SOCKET, sysSO_KEEPALIVE, 0},
 	soKeepidle:  {ianaProtocolTCP, int(sysSIO_KEEPALIVE_VALS), time.Millisecond},
 	soKeepintvl: {ianaProtocolTCP, int(sysSIO_KEEPALIVE_VALS), time.Millisecond},
+	soLinger:    {sysSOL_SOCKET, sysSO_LINGER, 0},
 }
 
 var parsers = map[int64]func([]byte) (Option, error){
@@ -41,6 +43,7 @@ var parsers = map[int64]func([]byte) (Option, error){
 	sysSOL_SOCKET<<32 | sysSO_RCVBUF:                   parseReceiveBuffer,
 	sysSOL_SOCKET<<32 | sysSO_KEEPALIVE:                parseKeepAlive,
 	ianaProtocolTCP<<32 | int64(sysSIO_KEEPALIVE_VALS): parseKeepAliveValues,
+	sysSOL_SOCKET<<32 | sysSO_LINGER:                   parseLinger,
 }
 
 // Marshal implements the Marshal method of Option interface.
@@ -111,6 +114,18 @@ func (cn ECN) Marshal() ([]byte, error) {
 	return nil, errors.New("operation not supported")
 }
 
+// Marshal implements the Marshal method of Option interface.
+func (l Linger) Marshal() ([]byte, error) {
+	v := struct {
+		OnOff  int32
+		Linger int32
+	}{
+		OnOff:  boolint32(l.OnOff),
+		Linger: int32(l.Linger / time.Second),
+	}
+	return (*[8]byte)(unsafe.Pointer(&v))[:], nil
+}
+
 func parseNoDelay(b []byte) (Option, error) {
 	if len(b) < 4 {
 		return nil, errors.New("short buffer")
@@ -141,4 +156,18 @@ func parseKeepAlive(b []byte) (Option, error) {
 
 func parseKeepAliveValues(b []byte) (Option, error) {
 	return nil, errors.New("operation not supported")
+}
+
+func parseLinger(b []byte) (Option, error) {
+	if len(b) < 8 {
+		return nil, errors.New("short buffer")
+	}
+	v := (*struct {
+		OnOff  int32
+		Linger int32
+	})(unsafe.Pointer(&b[0]))
+	return Linger{
+		OnOff:  uint32bool(uint32(v.OnOff)),
+		Linger: time.Duration(v.Linger) * time.Second,
+	}, nil
 }

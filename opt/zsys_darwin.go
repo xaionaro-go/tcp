@@ -10,6 +10,7 @@ const (
 	sysSO_SNDBUF    = 0x1001
 	sysSO_RCVBUF    = 0x1002
 	sysSO_ERROR     = 0x1007
+	sysSO_LINGER    = 0x80
 
 	sysTCP_NODELAY       = 0x1
 	sysTCP_MAXSEG        = 0x2
