@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build darwin || freebsd || linux || netbsd
 // +build darwin freebsd linux netbsd
 
 package tcp_test
@@ -18,8 +19,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mikioh/tcp"
-	"github.com/mikioh/tcpinfo"
+	"github.com/xaionaro-go/tcp"
+	"github.com/xaionaro-go/tcp/info"
 )
 
 var infoTests = []struct {
@@ -93,7 +94,7 @@ func TestInfo(t *testing.T) {
 func monitor(c *tcp.Conn, log chan<- string, sig <-chan struct{}) {
 	defer close(log)
 	log <- fmt.Sprintf("%s %v->%v", c.LocalAddr().Network(), c.LocalAddr(), c.RemoteAddr())
-	var o tcpinfo.Info
+	var o info.Info
 	var b [256]byte
 	for {
 		i, err := c.Option(o.Level(), o.Name(), b[:])
@@ -105,7 +106,7 @@ func monitor(c *tcp.Conn, log chan<- string, sig <-chan struct{}) {
 			continue
 		}
 		if runtime.GOOS == "linux" {
-			var oo tcpinfo.CCInfo
+			var oo info.CCInfo
 			ci, err := c.Option(oo.Level(), oo.Name(), b[:])
 			if err != nil {
 				return

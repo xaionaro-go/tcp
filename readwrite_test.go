@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build darwin || freebsd || linux || netbsd
 // +build darwin freebsd linux netbsd
 
 package tcp_test
@@ -12,8 +13,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/mikioh/tcp"
-	"github.com/mikioh/tcpinfo"
+	"github.com/xaionaro-go/tcp"
+	"github.com/xaionaro-go/tcp/info"
 )
 
 func server(t *testing.T, ln net.Listener) {
@@ -88,7 +89,7 @@ func TestConcurrentReadWriteAndInfo(t *testing.T) {
 			wwg.Add(1)
 			go func() {
 				defer wwg.Done()
-				var o tcpinfo.Info
+				var o info.Info
 				b := make([]byte, 256)
 				if _, err := tc.Option(o.Level(), o.Name(), b); err != nil {
 					t.Error(err)

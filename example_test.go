@@ -12,9 +12,9 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/mikioh/tcp"
-	"github.com/mikioh/tcpinfo"
-	"github.com/mikioh/tcpopt"
+	"github.com/xaionaro-go/tcp"
+	"github.com/xaionaro-go/tcp/info"
+	"github.com/xaionaro-go/tcp/opt"
 )
 
 // Monitoring a TCP connection
@@ -27,9 +27,9 @@ func ExampleConn() {
 	// your monitor goroutine can start monitoring the connection
 	// by using the Option method of Conn and tcpinfo package.
 	monitor := func(tc *tcp.Conn) {
-		tc.SetOption(tcpopt.KeepAlive(true))
-		tc.SetOption(tcpopt.KeepAliveProbeCount(3))
-		var o tcpinfo.Info
+		tc.SetOption(opt.KeepAlive(true))
+		tc.SetOption(opt.KeepAliveProbeCount(3))
+		var o info.Info
 		var b [256]byte
 		for {
 			i, err := tc.Option(o.Level(), o.Name(), b[:])

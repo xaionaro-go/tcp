@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mikioh/tcp"
-	"github.com/mikioh/tcpopt"
+	"github.com/xaionaro-go/tcp"
+	"github.com/xaionaro-go/tcp/opt"
 )
 
 func TestBuffered(t *testing.T) {
@@ -184,7 +184,7 @@ func TestCorkAndUncork(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := tc.SetOption(tcpopt.Cork(true)); err != nil {
+	if err := tc.SetOption(opt.Cork(true)); err != nil {
 		t.Fatal(err)
 	}
 	b := make([]byte, N)
@@ -194,7 +194,7 @@ func TestCorkAndUncork(t *testing.T) {
 		}
 		time.Sleep(5 * time.Millisecond)
 	}
-	if err := tc.SetOption(tcpopt.Cork(false)); err != nil {
+	if err := tc.SetOption(opt.Cork(false)); err != nil {
 		t.Fatal(err)
 	}
 
@@ -228,9 +228,9 @@ func TestBufferCap(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, o := range []tcpopt.Option{
-		tcpopt.SendBuffer(1<<16 - 1),
-		tcpopt.ReceiveBuffer(1<<16 - 1),
+	for _, o := range []opt.Option{
+		opt.SendBuffer(1<<16 - 1),
+		opt.ReceiveBuffer(1<<16 - 1),
 	} {
 		var b [4]byte
 		if runtime.GOOS != "windows" {
@@ -282,7 +282,7 @@ func TestBufferTrim(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	o := tcpopt.NotSentLowWMK(1)
+	o := opt.NotSentLowWMK(1)
 	var b [4]byte
 	if _, err := tc.Option(o.Level(), o.Name(), b[:]); err != nil {
 		t.Fatal(err)

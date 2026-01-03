@@ -11,19 +11,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mikioh/tcp"
-	"github.com/mikioh/tcpopt"
+	"github.com/xaionaro-go/tcp"
+	"github.com/xaionaro-go/tcp/opt"
 )
 
 func TestKeepAliveOptions(t *testing.T) {
-	opts := []tcpopt.Option{
-		tcpopt.KeepAlive(true),
-		tcpopt.KeepAliveIdleInterval(10 * time.Second), // solaris requires 10 seconds as the lowest value
-		tcpopt.KeepAliveProbeInterval(time.Second),
+	opts := []opt.Option{
+		opt.KeepAlive(true),
+		opt.KeepAliveIdleInterval(10 * time.Second), // solaris requires 10 seconds as the lowest value
+		opt.KeepAliveProbeInterval(time.Second),
 	}
 	switch runtime.GOOS {
 	case "darwin", "dragonfly", "freebsd", "linux", "netbsd", "solaris":
-		opts = append(opts, tcpopt.KeepAliveProbeCount(1))
+		opts = append(opts, opt.KeepAliveProbeCount(1))
 	case "windows":
 	default:
 		t.Skipf("not supported on %s/%s", runtime.GOOS, runtime.GOARCH)

@@ -7,14 +7,55 @@ package tcp
 import (
 	"net"
 	"syscall"
+	"time"
 
-	"github.com/mikioh/tcpopt"
+	"github.com/xaionaro-go/tcp/opt"
 )
 
 var _ net.Conn = &Conn{}
 
+// LocalAddr returns the local network address.
+func (c *Conn) LocalAddr() net.Addr {
+	return c.Conn.LocalAddr()
+}
+
+// RemoteAddr returns the remote network address.
+func (c *Conn) RemoteAddr() net.Addr {
+	return c.Conn.RemoteAddr()
+}
+
+// Read reads data from the connection.
+func (c *Conn) Read(b []byte) (int, error) {
+	return c.Conn.Read(b)
+}
+
+// Write writes data to the connection.
+func (c *Conn) Write(b []byte) (int, error) {
+	return c.Conn.Write(b)
+}
+
+// SetDeadline sets the read and write deadlines associated
+func (c *Conn) SetDeadline(t time.Time) error {
+	return c.Conn.SetDeadline(t)
+}
+
+// SetReadDeadline sets the deadline for future Read calls
+func (c *Conn) SetReadDeadline(t time.Time) error {
+	return c.Conn.SetReadDeadline(t)
+}
+
+// SetWriteDeadline sets the deadline for future Write calls
+func (c *Conn) SetWriteDeadline(t time.Time) error {
+	return c.Conn.SetWriteDeadline(t)
+}
+
+// Close closes the connection.
+func (c *Conn) Close() error {
+	return c.Conn.Close()
+}
+
 // SetOption sets a socket option.
-func (c *Conn) SetOption(o tcpopt.Option) error {
+func (c *Conn) SetOption(o opt.Option) error {
 	if !c.ok() {
 		return syscall.EINVAL
 	}
@@ -29,7 +70,7 @@ func (c *Conn) SetOption(o tcpopt.Option) error {
 }
 
 // Option returns a socket option.
-func (c *Conn) Option(level, name int, b []byte) (tcpopt.Option, error) {
+func (c *Conn) Option(level, name int, b []byte) (opt.Option, error) {
 	if !c.ok() || len(b) == 0 {
 		return nil, syscall.EINVAL
 	}
@@ -37,7 +78,7 @@ func (c *Conn) Option(level, name int, b []byte) (tcpopt.Option, error) {
 	if err != nil {
 		return nil, &net.OpError{Op: "raw-control", Net: c.LocalAddr().Network(), Source: nil, Addr: c.LocalAddr(), Err: err}
 	}
-	o, err := tcpopt.Parse(level, name, b[:n])
+	o, err := opt.Parse(level, name, b[:n])
 	if err != nil {
 		return nil, &net.OpError{Op: "raw-control", Net: c.LocalAddr().Network(), Source: nil, Addr: c.LocalAddr(), Err: err}
 	}

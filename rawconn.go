@@ -11,40 +11,41 @@ import (
 	"runtime"
 	"syscall"
 
-	"github.com/mikioh/tcpopt"
+	"github.com/xaionaro-go/tcp/opt"
+	xsyscall "github.com/xaionaro-go/tcp/syscall"
 )
 
 // A Conn represents an end point that uses TCP connection.
 // It allows to set non-portable, platform-dependent TCP-level socket
 // options.
 type Conn struct {
-	net.Conn
-	c syscall.RawConn
+	Conn    net.Conn
+	RawConn syscall.RawConn
 }
 
-func (c *Conn) ok() bool { return c != nil && c.Conn != nil && c.c != nil }
+func (c *Conn) ok() bool { return c != nil && c.Conn != nil && c.RawConn != nil }
 
 func (c *Conn) setOption(level, name int, b []byte) error {
 	var operr error
 	fn := func(s uintptr) {
-		operr = setsockopt(s, level, name, b)
+		operr = xsyscall.Setsockopt(s, level, name, b)
 	}
-	if err := c.c.Control(fn); err != nil {
+	if err := c.RawConn.Control(fn); err != nil {
 		return err
 	}
-	return os.NewSyscallError("setsockopt", operr)
+	return os.NewSyscallError("Setsockopt", operr)
 }
 
 func (c *Conn) option(level, name int, b []byte) (int, error) {
 	var operr error
 	var n int
 	fn := func(s uintptr) {
-		n, operr = getsockopt(s, level, name, b)
+		n, operr = xsyscall.Getsockopt(s, level, name, b)
 	}
-	if err := c.c.Control(fn); err != nil {
+	if err := c.RawConn.Control(fn); err != nil {
 		return 0, err
 	}
-	return n, os.NewSyscallError("getsockopt", operr)
+	return n, os.NewSyscallError("Getsockopt", operr)
 }
 
 func (c *Conn) buffered() int {
@@ -52,13 +53,13 @@ func (c *Conn) buffered() int {
 	var n int
 	fn := func(s uintptr) {
 		var b [4]byte
-		operr = ioctl(s, options[soBuffered].name, b[:])
+		operr = xsyscall.Ioctl(s, xsyscall.OptionByKey(xsyscall.SoBuffered).Name, b[:])
 		if operr != nil {
 			return
 		}
-		n = int(nativeEndian.Uint32(b[:]))
+		n = int(xsyscall.NativeEndian.Uint32(b[:]))
 	}
-	err := c.c.Control(fn)
+	err := c.RawConn.Control(fn)
 	if err != nil || operr != nil {
 		return -1
 	}
@@ -71,24 +72,24 @@ func (c *Conn) available() int {
 	fn := func(s uintptr) {
 		var b [4]byte
 		if runtime.GOOS == "darwin" {
-			_, operr = getsockopt(s, options[soAvailable].level, options[soAvailable].name, b[:])
+			_, operr = xsyscall.Getsockopt(s, xsyscall.OptionByKey(xsyscall.SoAvailable).Level, xsyscall.OptionByKey(xsyscall.SoAvailable).Name, b[:])
 		} else {
-			operr = ioctl(s, options[soAvailable].name, b[:])
+			operr = xsyscall.Ioctl(s, xsyscall.OptionByKey(xsyscall.SoAvailable).Name, b[:])
 		}
 		if operr != nil {
 			return
 		}
-		n = int(nativeEndian.Uint32(b[:]))
+		n = int(xsyscall.NativeEndian.Uint32(b[:]))
 		if runtime.GOOS == "darwin" || runtime.GOOS == "linux" {
-			var o tcpopt.SendBuffer
-			_, operr = getsockopt(s, o.Level(), o.Name(), b[:])
+			var o opt.SendBuffer
+			_, operr = xsyscall.Getsockopt(s, o.Level(), o.Name(), b[:])
 			if operr != nil {
 				return
 			}
-			n = int(nativeEndian.Uint32(b[:])) - n
+			n = int(xsyscall.NativeEndian.Uint32(b[:])) - n
 		}
 	}
-	err := c.c.Control(fn)
+	err := c.RawConn.Control(fn)
 	if err != nil || operr != nil {
 		return -1
 	}
@@ -106,7 +107,7 @@ func NewConn(c net.Conn) (*Conn, error) {
 	switch c := c.(type) {
 	case tcpConn:
 		var err error
-		cc.c, err = c.SyscallConn()
+		cc.RawConn, err = c.SyscallConn()
 		if err != nil {
 			return nil, err
 		}

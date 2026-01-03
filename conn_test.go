@@ -8,7 +8,7 @@ import (
 	"net"
 	"testing"
 
-	"github.com/mikioh/tcp"
+	"github.com/xaionaro-go/tcp"
 	"golang.org/x/net/nettest"
 )
 

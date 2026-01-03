@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build darwin || dragonfly || freebsd || openbsd
 // +build darwin dragonfly freebsd openbsd
 
 package tcp
@@ -11,6 +12,8 @@ import (
 	"os"
 	"syscall"
 	"unsafe"
+
+	xsyscall "github.com/xaionaro-go/tcp/syscall"
 )
 
 func (*Conn) originalDst(la, ra *net.TCPAddr) (net.Addr, error) {
@@ -20,24 +23,24 @@ func (*Conn) originalDst(la, ra *net.TCPAddr) (net.Addr, error) {
 	}
 	defer f.Close()
 	fd := f.Fd()
-	b := make([]byte, sizeofPfiocNatlook)
-	nl := (*pfiocNatlook)(unsafe.Pointer(&b[0]))
+	b := make([]byte, xsyscall.SizeofPfiocNatlook)
+	nl := (*xsyscall.PfiocNatlook)(unsafe.Pointer(&b[0]))
 	if ra.IP.To4() != nil {
 		copy(nl.Saddr[:net.IPv4len], ra.IP.To4())
 		copy(nl.Daddr[:net.IPv4len], la.IP.To4())
-		nl.Af = sysAF_INET
+		nl.Af = xsyscall.SysAF_INET
 	}
 	if ra.IP.To16() != nil && ra.IP.To4() == nil {
 		copy(nl.Saddr[:], ra.IP)
 		copy(nl.Daddr[:], la.IP)
-		nl.Af = sysAF_INET6
+		nl.Af = xsyscall.SysAF_INET6
 	}
-	nl.setPort(ra.Port, la.Port)
-	nl.Proto = ianaProtocolTCP
-	ioc := uintptr(sysDIOCNATLOOK)
-	for _, dir := range []byte{sysPF_OUT, sysPF_IN} {
+	nl.SetPort(ra.Port, la.Port)
+	nl.Proto = xsyscall.IANAProtocolTCP
+	ioc := uintptr(xsyscall.SysDIOCNATLOOK)
+	for _, dir := range []byte{xsyscall.SysPF_OUT, xsyscall.SysPF_IN} {
 		nl.Direction = dir
-		err = ioctl(fd, int(ioc), b)
+		err = xsyscall.Ioctl(fd, int(ioc), b)
 		if err == nil || err != syscall.ENOENT {
 			break
 		}
@@ -46,12 +49,12 @@ func (*Conn) originalDst(la, ra *net.TCPAddr) (net.Addr, error) {
 		return nil, os.NewSyscallError("ioctl", err)
 	}
 	od := new(net.TCPAddr)
-	od.Port = nl.rdPort()
+	od.Port = nl.ReadPort()
 	switch nl.Af {
-	case sysAF_INET:
+	case xsyscall.SysAF_INET:
 		od.IP = make(net.IP, net.IPv4len)
 		copy(od.IP, nl.Rdaddr[:net.IPv4len])
-	case sysAF_INET6:
+	case xsyscall.SysAF_INET6:
 		od.IP = make(net.IP, net.IPv6len)
 		copy(od.IP, nl.Rdaddr[:])
 	}
